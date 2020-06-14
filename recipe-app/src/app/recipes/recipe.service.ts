@@ -9,31 +9,11 @@ export class RecipeService {
   recipesChanged = new Subject<Recipe[]>();
   private recipes: Recipe[] = [];
 
-  constructor(private shoppingListService: ShoppingListService) {
-    this.recipes = [
-      new Recipe(
-        1,
-        'Bolo de cenoura',
-        'Bolo da vovó',
-        'https://img.cybercook.com.br/receitas/975/bolo-de-cenoura-31-623x350.jpeg',
-        [
-          new Ingredient('Cenouras', 3),
-          new Ingredient('Ovos', 2),
-          new Ingredient('Bombons de chocolate', 3),
-        ]
-      ),
-      new Recipe(
-        2,
-        'Bife a parmegiana',
-        'Bife muito gostoso para comer no almoço',
-        'https://www.receitasnestle.com.br/images/default-source/recipes/bife_a_parmegiana_alta.jpg?sfvrsn=32461fd_0',
-        [
-          new Ingredient('Bife', 1),
-          new Ingredient('Mussarela', 2),
-          new Ingredient('Cebolas', 3),
-        ]
-      ),
-    ];
+  constructor(private shoppingListService: ShoppingListService) {}
+
+  setRecipes(recipes: Recipe[]) {
+    this.recipes = recipes;
+    this.notifyRecipesChanged();
   }
 
   addIngredientsToShoppingList(ingredients: Ingredient[]) {
