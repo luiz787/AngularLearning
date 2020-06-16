@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { User } from './user.model';
+import { environment } from '../../environments/environment';
 
 export interface AuthResponseData {
   kind: string;
@@ -17,7 +18,7 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiKey = 'AIzaSyAljTKs4oOFoFRI6HMU-EUpDToBdNLa-g4';
+  private apiKey = environment.apiKey;
 
   user = new BehaviorSubject<User>(null);
   token: string = null;
