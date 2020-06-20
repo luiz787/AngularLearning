@@ -1,41 +1,35 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Ingredient } from '../shared/ingredient.model';
-import { ShoppingListService } from './shopping-list.service';
-import { Subscription, Subject } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { LoggingService } from '../auth/logging.service';
+import { Ingredient } from '../shared/ingredient.model';
+import * as ShoppingListActions from './store/shopping-list.actions';
+import * as fromShoppingList from './store/shopping-list.reducer';
 
 @Component({
   selector: 'app-shopping-list',
   templateUrl: 'shopping-list.component.html',
 })
 export class ShoppingListComponent implements OnInit, OnDestroy {
-  ingredients: Ingredient[] = [];
-  private ingredientChangedSubscription: Subscription;
+  ingredients: Observable<fromShoppingList.ShoppingListState>;
 
   constructor(
-    private shoppingListService: ShoppingListService,
-    private loggingService: LoggingService
+    private loggingService: LoggingService,
+    private store: Store<fromShoppingList.AppState>
   ) {}
 
   ngOnInit(): void {
-    this.ingredients = this.shoppingListService.getIngredients();
-    this.ingredientChangedSubscription = this.shoppingListService.ingredientsChanged.subscribe(
-      (ingredients: Ingredient[]) => {
-        this.ingredients = ingredients;
-      }
-    );
+    this.ingredients = this.store.select('shoppingList');
     this.loggingService.printLog('Hello from ShoppingListComponent ngOnInit');
   }
 
-  ngOnDestroy() {
-    this.ingredientChangedSubscription.unsubscribe();
-  }
+  ngOnDestroy() {}
 
   addIngredient(ingredient: Ingredient) {
-    this.shoppingListService.addIngredient(ingredient);
+    this.store.dispatch(new ShoppingListActions.AddIngredient(ingredient));
   }
 
   onEditItem(index: number) {
-    this.shoppingListService.startedEditing.next(index);
+    this.store.dispatch(new ShoppingListActions.StartEdit(index));
   }
 }
