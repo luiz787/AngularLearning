@@ -1,8 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DataStorageService } from '../shared/data-storage.service';
-import { AuthService } from '../auth/auth.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { User } from '../auth/user.model';
+import { AuthService } from '../auth/auth.service';
+import * as fromAuth from '../auth/store/auth.reducer';
+import { DataStorageService } from '../shared/data-storage.service';
+import * as fromApp from '../store/app.reducer';
+import * as AuthActions from '../auth/store/auth.actions';
 
 @Component({
   selector: 'app-header',
@@ -14,13 +17,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private dataStorageService: DataStorageService
+    private dataStorageService: DataStorageService,
+    private store: Store<fromApp.AppState>
   ) {}
 
   ngOnInit() {
-    this.userSubscription = this.authService.user.subscribe((user) => {
-      this.isAuthenticated = user !== null;
-    });
+    this.userSubscription = this.store
+      .select('auth')
+      .subscribe((authState: fromAuth.State) => {
+        this.isAuthenticated = authState.user !== null;
+      });
   }
 
   ngOnDestroy() {
@@ -36,6 +42,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onLogout() {
-    this.authService.logout();
+    this.store.dispatch(new AuthActions.Logout());
   }
 }
