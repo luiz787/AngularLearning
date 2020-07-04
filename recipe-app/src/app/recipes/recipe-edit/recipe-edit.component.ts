@@ -1,25 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
-import { RecipeService } from '../recipe.service';
-import { Recipe } from '../recipe.model';
 import { Store } from '@ngrx/store';
-import * as fromApp from '../../store/app.reducer';
+import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import * as fromApp from '../../store/app.reducer';
+import { Recipe } from '../recipe.model';
+import * as RecipesActions from '../store/recipes.actions';
 
 @Component({
   selector: 'app-recipe-edit',
   templateUrl: './recipe-edit.component.html',
   styleUrls: ['./recipe-edit.component.css'],
 })
-export class RecipeEditComponent implements OnInit {
+export class RecipeEditComponent implements OnInit, OnDestroy {
   id: number;
   editMode = false;
   recipeForm: FormGroup;
+  private storeSubscription: Subscription;
 
   constructor(
     private route: ActivatedRoute,
-    private recipeService: RecipeService,
     private router: Router,
     private store: Store<fromApp.AppState>
   ) {}
@@ -32,6 +33,10 @@ export class RecipeEditComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.storeSubscription?.unsubscribe();
+  }
+
   onSubmit() {
     const newRecipe = new Recipe(
       this.id,
@@ -41,10 +46,11 @@ export class RecipeEditComponent implements OnInit {
       this.recipeForm.value['ingredients']
     );
     if (this.editMode) {
-      this.recipeService.updateRecipe(this.id, newRecipe);
+      this.store.dispatch(
+        new RecipesActions.UpdateRecipe({ index: this.id, newRecipe })
+      );
     } else {
-      newRecipe.id = this.recipeService.getRecipes().length + 1;
-      this.recipeService.addRecipe(newRecipe);
+      this.store.dispatch(new RecipesActions.AddRecipe(newRecipe));
     }
     this.goBack();
   }
@@ -86,7 +92,7 @@ export class RecipeEditComponent implements OnInit {
     let recipeDescription = '';
     let recipeIngredients = new FormArray([]);
     if (this.editMode) {
-      this.store
+      this.storeSubscription = this.store
         .select('recipes')
         .pipe(
           map((recipesState) =>

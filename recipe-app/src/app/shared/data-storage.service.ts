@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { map, tap } from 'rxjs/operators';
 import { Recipe } from '../recipes/recipe.model';
 import { RecipeService } from '../recipes/recipe.service';
-import * as RecipesActions from '../recipes/store/recipe.actions';
+import * as RecipesActions from '../recipes/store/recipes.actions';
 import * as fromApp from '../store/app.reducer';
 
 @Injectable({
